@@ -1,21 +1,23 @@
 import { Request, Response } from "express";
 import catchError from "http-errors";
 import { StatusCodes } from "http-status-codes";
+import { CartItem } from "@prisma/client";
 import { prisma } from "../db/productDb";
-import {CartItem} from "@prisma/client"
 import { OrderModel } from "../models/orderModel";
 
 const createOrder = async (req: Request, res: Response) => {
   //----> Destructure cart items from the createOrderDto
   const { cartItems, ...rests } = req.body as OrderModel;
+  const userId = rests?.userId;
 
   //----> Retrieve the user attached to this order
-  const user = await prisma.user.findUnique({ where: { id: rests?.userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
 
   //---> Check for the existence of user.
   if (!user) {
-    throw catchError(StatusCodes.NOT_FOUND,
-      `The user with userId = ${rests?.userId} doesn't exist in the database!`
+    throw catchError(
+      StatusCodes.NOT_FOUND,
+      `The user with userId = ${userId} doesn't exist in the database!`
     );
   }
 
@@ -39,7 +41,7 @@ const createOrder = async (req: Request, res: Response) => {
   });
 
   //----> Send back response.
-  res.status(StatusCodes.CREATED).json({ status: "success", order });
+  res.status(StatusCodes.CREATED).json(order);
 };
 
 const deleteOrder = async (req: Request, res: Response) => {
@@ -51,7 +53,8 @@ const deleteOrder = async (req: Request, res: Response) => {
 
   //----> Check for existence of order.
   if (!order) {
-    throw catchError(StatusCodes.NOT_FOUND,
+    throw catchError(
+      StatusCodes.NOT_FOUND,
       `The order with id : ${id} is not found in the database!`
     );
   }
@@ -73,21 +76,25 @@ const deleteOrder = async (req: Request, res: Response) => {
 
   //----> Delete the order.
   const deletedOrder = await prisma.order.delete({ where: { id } });
-  
+
   //----> Send back the response.
-  res.status(StatusCodes.OK).json({ status: "success", deletedOrder });
+  res.status(StatusCodes.OK).json(deletedOrder);
 };
 
 const getAllOrders = async (req: Request, res: Response) => {
   //----> Get orders from database.
-  const orders = await prisma.order.findMany();
+  const orders = await prisma.order.findMany({
+    include: {
+      cartItems: true,
+    },
+  });
 
   if (!orders || orders.length === 0) {
     throw catchError(StatusCodes.NOT_FOUND, "Orders are empty!");
   }
 
   //----> Send back response.
-  res.status(StatusCodes.OK).json({ status: "success", orders });
+  res.status(StatusCodes.OK).json(orders);
 };
 
 const getOrderById = async (req: Request, res: Response) => {
@@ -95,19 +102,32 @@ const getOrderById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   //----> Check for the existence of order in the database.
-  const order = await prisma.order.findUnique({ where: { id } });
+  const order = await prisma.order.findUnique({where: { id },include: {cartItems: true,},});
 
   //----> Throw error for non existent order.
   if (!order) {
-    throw catchError(
-      StatusCodes.NOT_FOUND,
-      `Order with id = ${id} is not found.`
-    );
+    throw catchError(StatusCodes.NOT_FOUND,`Order with id = ${id} is not found.`);
   }
 
   //----> Send back response.
-  res.status(StatusCodes.OK).json({ status: "success", order });
+  res.status(StatusCodes.OK).json(order);
 };
+
+const getOrdersByUserId = async (req: Request, res: Response) => {
+  //----> Extract the user id from params.
+  const {userId} = req.params;
+
+  //----> Get orders by user id.
+  const orders = await prisma.order.findMany({where: {userId}});
+
+  //----> Check for the existence of orders.
+  if (!orders || orders.length === 0) {
+    throw catchError(StatusCodes.NOT_FOUND, `Orders by user with userId : ${userId}`);
+  }
+
+  //----> Send back the response.
+  res.status(StatusCodes.OK).json(orders);
+}
 
 const updatedOrder = async (req: Request, res: Response) => {
   //----> Get the order id from params.
@@ -116,13 +136,18 @@ const updatedOrder = async (req: Request, res: Response) => {
   //----> Destructure the payload.
   const { cartItems, ...rests } = req.body as OrderModel;
 
-  //----> Retrieve the user attached to this order
-  const user = await prisma.user.findUnique({ where: { id: rests?.userId } });
+  const userId = rests?.userId;
 
+  console.log({ cartItems, rests, userId });
+
+  //----> Retrieve the user attached to this order
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  console.log({ user });
   //---> Check for the existence of user.
   if (!user) {
-    throw catchError(StatusCodes.NOT_FOUND,
-      `The user with userId = ${rests?.userId} doesn't exist in the database!`
+    throw catchError(
+      StatusCodes.NOT_FOUND,
+      `The user with userId = ${userId} doesn't exist in the database!`
     );
   }
 
@@ -131,7 +156,10 @@ const updatedOrder = async (req: Request, res: Response) => {
 
   //----> Check for existence of order.
   if (!order) {
-    throw catchError(StatusCodes.NOT_FOUND, `The order with id : ${id} is not found in the database!`);
+    throw catchError(
+      StatusCodes.NOT_FOUND,
+      `The order with id : ${id} is not found in the database!`
+    );
   }
 
   //----> Update cart items.
@@ -154,28 +182,28 @@ const updatedOrder = async (req: Request, res: Response) => {
     where: { id },
     include: { cartItems: true },
   });
- 
+
   //----> Send back the response.
-  res.status(StatusCodes.OK).json({ status: "success", updatedOrder });
+  res.status(StatusCodes.OK).json(updatedOrder);
 };
 
 function totalPrice(cartItems: CartItem[]) {
   return cartItems.reduce(
     (prev, cartItem) => Number(cartItem.price) * cartItem.quantity + prev,
-    0,
+    0
   );
 }
 
 function totalNumberOfItems(cartItems: CartItem[]) {
   return cartItems.reduce(
     (prev, cartItem) => Number(cartItem.quantity) + prev,
-    0,
+    0
   );
 }
 
 function updateCartItems(cartItems: CartItem[]) {
-    return cartItems.map(async (item) => {
-      return await this.prisma.cartItem.update({
+  return cartItems.map(async (item) => {
+    await prisma.cartItem.update({
       where: { id: item.id },
       data: { ...item },
     });
@@ -187,5 +215,6 @@ export {
   deleteOrder,
   getAllOrders,
   getOrderById,
+  getOrdersByUserId,
   updatedOrder,
 };

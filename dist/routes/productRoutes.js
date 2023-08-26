@@ -20,7 +20,6 @@ router
     .delete(authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), productController_1.deleteProduct)
     .get(authenticationMiddleware_1.authenticationMiddleware, productController_1.getProductById)
     .patch(productValidationMiddleware_1.productValidationMiddleware, authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), productController_1.updatedProduct);
-router
-    .route("/users/:userId")
-    .get(authenticationMiddleware_1.authenticationMiddleware, productController_1.getAllProductsByUserId);
+router.route("/categories/:categoryId")
+    .get(authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), productController_1.getProductsByCategoryId);
 exports.default = router;

@@ -7,12 +7,15 @@ import { CartItemModel } from "../models/cartItemModel";
 const createCartItem = async (req: Request, res: Response) => {
   //----> Get new cartItem input from body.
   const { body: newCartItem } = req;
-  const {productId} = req.body as CartItemModel;
+  const { productId } = req.body as CartItemModel;
 
   //----> Retrieve the product attach to cartItem.
-  const product = await prisma.product.findUnique({where: {id: productId}});
-  if (!product){
-    throw catchError(StatusCodes.NOT_FOUND, `The product with id : ${productId} is not found in the database!`);
+  const product = await prisma.product.findUnique({ where: { id: productId } });
+  if (!product) {
+    throw catchError(
+      StatusCodes.NOT_FOUND,
+      `The product with id : ${productId} is not found in the database!`
+    );
   }
 
   //----> Store the new cartItem in the database.
@@ -21,7 +24,7 @@ const createCartItem = async (req: Request, res: Response) => {
   });
 
   //----> Send back response.
-  res.status(StatusCodes.CREATED).json({ status: "success", createdCartItem });
+  res.status(StatusCodes.CREATED).json(createdCartItem);
 };
 
 const deleteCartItem = async (req: Request, res: Response) => {
@@ -43,19 +46,19 @@ const deleteCartItem = async (req: Request, res: Response) => {
   const deletedCartItem = await prisma.cartItem.delete({ where: { id } });
 
   //----> Send back the response.
-  res.status(StatusCodes.OK).json({ status: "success", deletedCartItem });
+  res.status(StatusCodes.OK).json(deletedCartItem);
 };
 
 const getAllCartItems = async (req: Request, res: Response) => {
   //----> Get cartItems from database.
   const cartItems = await prisma.cartItem.findMany();
 
-  if(!cartItems || cartItems.length === 0){
+  if (!cartItems || cartItems.length === 0) {
     throw catchError(StatusCodes.NOT_FOUND, "CarItems are empty! ");
   }
-  
+
   //----> Send back response.
-  res.status(StatusCodes.OK).json({ status: "success", cartItems });
+  res.status(StatusCodes.OK).json(cartItems);
 };
 
 const getCartItemById = async (req: Request, res: Response) => {
@@ -74,7 +77,7 @@ const getCartItemById = async (req: Request, res: Response) => {
   }
 
   //----> Send back response.
-  res.status(StatusCodes.OK).json({ status: "success", cartItem });
+  res.status(StatusCodes.OK).json(cartItem);
 };
 
 const updatedCartItem = async (req: Request, res: Response) => {
@@ -112,7 +115,7 @@ const updatedCartItem = async (req: Request, res: Response) => {
   });
 
   //----> Send back the response.
-  res.status(StatusCodes.OK).json({ status: "success", editedCartItem });
+  res.status(StatusCodes.OK).json(editedCartItem);
 };
 
 export {

@@ -8,12 +8,12 @@ const createCategory = async (req: Request, res: Response) => {
   const { body: newCategory } = req;
   
   //----> Store the new category in the database.
-  const createdCategory = await prisma.category.create({
+  const category = await prisma.category.create({
     data: { ...newCategory },
   });
 
   //----> Send back response.
-  res.status(StatusCodes.CREATED).json({ status: "success", createdCategory });
+  res.status(StatusCodes.CREATED).json(category);
 };
 
 const deleteCategory = async (req: Request, res: Response) => {
@@ -35,7 +35,7 @@ const deleteCategory = async (req: Request, res: Response) => {
   const deletedCategory = await prisma.category.delete({ where: { id } });
 
   //----> Send back the response.
-  res.status(StatusCodes.OK).json({ status: "success", deletedCategory });
+  res.status(StatusCodes.OK).json(deletedCategory);
 };
 
 const getAllCategories = async (req: Request, res: Response) => {
@@ -47,7 +47,7 @@ const getAllCategories = async (req: Request, res: Response) => {
   }
 
   //----> Send back response.
-  res.status(StatusCodes.OK).json({ status: "success", categories });
+  res.status(StatusCodes.OK).json(categories);
 };
 
 const getCategoryById = async (req: Request, res: Response) => {
@@ -66,7 +66,7 @@ const getCategoryById = async (req: Request, res: Response) => {
   }
 
   //----> Send back response.
-  res.status(StatusCodes.OK).json({ status: "success", category });
+  res.status(StatusCodes.OK).json(category);
 };
 
 const updatedCategory = async (req: Request, res: Response) => {
@@ -94,7 +94,7 @@ const updatedCategory = async (req: Request, res: Response) => {
   });
 
   //----> Send back the response.
-  res.status(StatusCodes.OK).json({ status: "success", editedCategory });
+  res.status(StatusCodes.OK).json(editedCategory);
 };
 
 export {

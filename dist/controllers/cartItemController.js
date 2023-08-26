@@ -30,7 +30,7 @@ const createCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function*
         data: Object.assign({}, newCartItem),
     });
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.CREATED).json({ status: "success", createdCartItem });
+    res.status(http_status_codes_1.StatusCodes.CREATED).json(createdCartItem);
 });
 exports.createCartItem = createCartItem;
 const deleteCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -45,14 +45,17 @@ const deleteCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function*
     //----> Delete the cartItem from the database.
     const deletedCartItem = yield productDb_1.prisma.cartItem.delete({ where: { id } });
     //----> Send back the response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", deletedCartItem });
+    res.status(http_status_codes_1.StatusCodes.OK).json(deletedCartItem);
 });
 exports.deleteCartItem = deleteCartItem;
 const getAllCartItems = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //----> Get cartItems from database.
     const cartItems = yield productDb_1.prisma.cartItem.findMany();
+    if (!cartItems || cartItems.length === 0) {
+        throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, "CarItems are empty! ");
+    }
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", cartItems });
+    res.status(http_status_codes_1.StatusCodes.OK).json(cartItems);
 });
 exports.getAllCartItems = getAllCartItems;
 const getCartItemById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -65,7 +68,7 @@ const getCartItemById = (req, res) => __awaiter(void 0, void 0, void 0, function
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `CartItem with id = ${id} is not found.`);
     }
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", cartItem });
+    res.status(http_status_codes_1.StatusCodes.OK).json(cartItem);
 });
 exports.getCartItemById = getCartItemById;
 const updatedCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -91,6 +94,6 @@ const updatedCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function
         data: Object.assign({}, cartItemToEdit),
     });
     //----> Send back the response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", editedCartItem });
+    res.status(http_status_codes_1.StatusCodes.OK).json(editedCartItem);
 });
 exports.updatedCartItem = updatedCartItem;

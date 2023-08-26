@@ -4,6 +4,7 @@ import {
   deleteProduct,
   getAllProducts,
   getProductById,
+  getProductsByCategoryId,
   updatedProduct,
 } from "../controllers/productController";
 import { idValidMiddleware } from "../middleware/idValidMiddleware";
@@ -42,5 +43,8 @@ router
     roleAuthorizationMiddleware("Admin"),
     updatedProduct
   );
+
+router.route("/categories/:categoryId")
+    .get(authenticationMiddleware, roleAuthorizationMiddleware("Admin"), getProductsByCategoryId);
 
 export default router;

@@ -20,11 +20,11 @@ const createCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
     //----> Get new category input from body.
     const { body: newCategory } = req;
     //----> Store the new category in the database.
-    const createdCategory = yield productDb_1.prisma.category.create({
+    const category = yield productDb_1.prisma.category.create({
         data: Object.assign({}, newCategory),
     });
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.CREATED).json({ status: "success", createdCategory });
+    res.status(http_status_codes_1.StatusCodes.CREATED).json(category);
 });
 exports.createCategory = createCategory;
 const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -39,14 +39,17 @@ const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
     //----> Delete the category from the database.
     const deletedCategory = yield productDb_1.prisma.category.delete({ where: { id } });
     //----> Send back the response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", deletedCategory });
+    res.status(http_status_codes_1.StatusCodes.OK).json(deletedCategory);
 });
 exports.deleteCategory = deleteCategory;
 const getAllCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //----> Get categories from database.
     const categories = yield productDb_1.prisma.category.findMany();
+    if (!categories || categories.length === 0) {
+        throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, "Categories are empty!");
+    }
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", categories });
+    res.status(http_status_codes_1.StatusCodes.OK).json(categories);
 });
 exports.getAllCategories = getAllCategories;
 const getCategoryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -59,7 +62,7 @@ const getCategoryById = (req, res) => __awaiter(void 0, void 0, void 0, function
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `Category with id = ${id} is not found.`);
     }
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", category });
+    res.status(http_status_codes_1.StatusCodes.OK).json(category);
 });
 exports.getCategoryById = getCategoryById;
 const updatedCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -79,6 +82,6 @@ const updatedCategory = (req, res) => __awaiter(void 0, void 0, void 0, function
         data: Object.assign({}, categoryToEdit),
     });
     //----> Send back the response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", editedCategory });
+    res.status(http_status_codes_1.StatusCodes.OK).json(editedCategory);
 });
 exports.updatedCategory = updatedCategory;

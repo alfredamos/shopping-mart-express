@@ -4,6 +4,7 @@ import {
   deleteOrder,
   getAllOrders,
   getOrderById,
+  getOrdersByUserId,
   updatedOrder,
 } from "../controllers/orderController";
 import { idValidMiddleware } from "../middleware/idValidMiddleware";
@@ -39,5 +40,8 @@ router
     roleAuthorizationMiddleware("Admin"),
     updatedOrder
   );
+
+router.route("/users/:userId")
+    .get(authenticationMiddleware, roleAuthorizationMiddleware("Admin"), getOrdersByUserId);
 
 export default router;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatedProduct = exports.getProductById = exports.getAllProductsByUserId = exports.getAllProducts = exports.deleteProduct = exports.createProduct = void 0;
+exports.updatedProduct = exports.getProductsByCategoryId = exports.getProductById = exports.getAllProducts = exports.deleteProduct = exports.createProduct = void 0;
 const productDb_1 = require("../db/productDb");
 const http_errors_1 = __importDefault(require("http-errors"));
 const http_status_codes_1 = require("http-status-codes");
@@ -21,16 +21,18 @@ const createProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { body: newProduct } = req;
     const { categoryId } = req.body;
     //----> Retrieve the product category.
-    const category = yield productDb_1.prisma.category.findUnique({ where: { id: categoryId } });
+    const category = yield productDb_1.prisma.category.findUnique({
+        where: { id: categoryId },
+    });
     if (!category) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `Category with id : ${categoryId} is not found in the database!`);
     }
     //----> Store the new product in the database.
-    const createdProduct = yield productDb_1.prisma.product.create({
+    const product = yield productDb_1.prisma.product.create({
         data: Object.assign({}, newProduct),
     });
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.CREATED).json({ status: "success", createdProduct });
+    res.status(http_status_codes_1.StatusCodes.CREATED).json(product);
 });
 exports.createProduct = createProduct;
 const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -45,44 +47,51 @@ const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     //----> Delete the product from the database.
     const deletedProduct = yield productDb_1.prisma.product.delete({ where: { id } });
     //----> Send back the response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", deletedProduct });
+    res.status(http_status_codes_1.StatusCodes.OK).json(deletedProduct);
 });
 exports.deleteProduct = deleteProduct;
 const getAllProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //----> Get products from database.
-    const products = yield productDb_1.prisma.product.findMany();
+    const products = yield productDb_1.prisma.product.findMany({
+        include: {
+            category: {
+                select: { name: true },
+            },
+        },
+    });
+    if (!products || products.length === 0) {
+        throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, "Products are empty!");
+    }
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", products });
+    res.status(http_status_codes_1.StatusCodes.OK).json(products);
 });
 exports.getAllProducts = getAllProducts;
-const getAllProductsByUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //----> Get the user info that was previously stored in the req.
-    const userInfo = req["userInfo"];
-    //----> Get the userId from user info.
-    const userId = userInfo === null || userInfo === void 0 ? void 0 : userInfo.id;
-    //----> Get all the products by userId from database.
-    const products = yield productDb_1.prisma.product.findMany({ where: { id: userId } });
-    //----> Throw error for non existent products.
-    if (!products || products.length < 1) {
-        throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `No product attached with userId = ${userId}`);
-    }
-    //----> Send back response
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", products });
-});
-exports.getAllProductsByUserId = getAllProductsByUserId;
 const getProductById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //----> Get the product id from params
     const { id } = req.params;
     //----> Check for the existence of product in the database.
-    const product = yield productDb_1.prisma.product.findUnique({ where: { id } });
+    const product = yield productDb_1.prisma.product.findUnique({ where: { id }, include: { category: { select: { name: true } } } });
     //----> Throw error for non existent product.
     if (!product) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `Product with id = ${id} is not found.`);
     }
     //----> Send back response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", product });
+    res.status(http_status_codes_1.StatusCodes.OK).json(product);
 });
 exports.getProductById = getProductById;
+const getProductsByCategoryId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //----> Extract the category id from params.
+    const { categoryId } = req.params;
+    //----> Get products by category id.
+    const products = yield productDb_1.prisma.product.findMany({ where: { categoryId }, include: { category: { select: { name: true } } } });
+    //----> Check for existence of products.
+    if (!products || products.length === 0) {
+        throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `Products with categoryId : ${categoryId} is available in the database!`);
+    }
+    //----> Send back the respond.
+    res.status(http_status_codes_1.StatusCodes.OK).json(products);
+});
+exports.getProductsByCategoryId = getProductsByCategoryId;
 const updatedProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //----> Get the product id from params.
     const { id } = req.params;
@@ -108,6 +117,6 @@ const updatedProduct = (req, res) => __awaiter(void 0, void 0, void 0, function*
         data: Object.assign({}, productToEdit),
     });
     //----> Send back the response.
-    res.status(http_status_codes_1.StatusCodes.OK).json({ status: "success", editedProduct });
+    res.status(http_status_codes_1.StatusCodes.OK).json(editedProduct);
 });
 exports.updatedProduct = updatedProduct;
