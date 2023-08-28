@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatedOrder = exports.getOrdersByUserId = exports.getOrderById = exports.getAllOrders = exports.deleteOrder = exports.createOrder = void 0;
+exports.updateOrderStatus = exports.updatedOrder = exports.getOrdersByUserId = exports.getOrderById = exports.getAllOrders = exports.deleteOrder = exports.createOrder = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
 const http_status_codes_1 = require("http-status-codes");
 const productDb_1 = require("../db/productDb");
@@ -163,6 +163,24 @@ const updatedOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     res.status(http_status_codes_1.StatusCodes.OK).json(updatedOrder);
 });
 exports.updatedOrder = updatedOrder;
+const updateOrderStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //----> Get the id of the order to update its status.
+    const { id } = req.params;
+    //----> Retrieve the status from request body.
+    const { status } = req.body;
+    console.log({ id, status });
+    //----> Retrieve the order to update his status from database.
+    const order = yield productDb_1.prisma.order.findUnique({ where: { id } });
+    //----> Check for the existence of order.
+    if (!order) {
+        throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `The order with id : ${id} is not found the database!`);
+    }
+    //----> Update the order status in the database.
+    const updatedOrder = yield productDb_1.prisma.order.update({ where: { id }, data: Object.assign(Object.assign({}, order), { status }) });
+    //----> Send back the response.
+    res.status(http_status_codes_1.StatusCodes.OK).json(updatedOrder);
+});
+exports.updateOrderStatus = updateOrderStatus;
 function totalPrice(cartItems) {
     return cartItems.reduce((prev, cartItem) => Number(cartItem.price) * cartItem.quantity + prev, 0);
 }

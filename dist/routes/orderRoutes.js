@@ -9,6 +9,7 @@ const idValidMiddleware_1 = require("../middleware/idValidMiddleware");
 const authenticationMiddleware_1 = require("../middleware/authenticationMiddleware");
 const orderValidationMiddleware_1 = require("../middleware/orderValidationMiddleware");
 const roleAuthorizationMiddleware_1 = require("../middleware/roleAuthorizationMiddleware");
+const orderStatusValidationMiddleware_1 = require("../middleware/orderStatusValidationMiddleware");
 const router = express_1.default.Router();
 router.param("id", idValidMiddleware_1.idValidMiddleware);
 router
@@ -20,6 +21,8 @@ router
     .delete(authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), orderController_1.deleteOrder)
     .get(authenticationMiddleware_1.authenticationMiddleware, orderController_1.getOrderById)
     .patch(orderValidationMiddleware_1.orderValidationMiddleware, authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), orderController_1.updatedOrder);
+router.route("/order-status/:id")
+    .patch(orderStatusValidationMiddleware_1.orderStatusValidationMiddleware, authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), orderController_1.updateOrderStatus);
 router.route("/users/:userId")
     .get(authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), orderController_1.getOrdersByUserId);
 exports.default = router;

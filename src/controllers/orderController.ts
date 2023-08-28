@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import catchError from "http-errors";
 import { StatusCodes } from "http-status-codes";
-import { CartItem } from "@prisma/client";
+import { CartItem, Status } from "@prisma/client";
 import { prisma } from "../db/productDb";
 import { OrderModel } from "../models/orderModel";
+import { OrderStatusModel } from "../models/orderStatusModel";
 
 const createOrder = async (req: Request, res: Response) => {
   //----> Destructure cart items from the createOrderDto
@@ -187,6 +188,29 @@ const updatedOrder = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json(updatedOrder);
 };
 
+const updateOrderStatus = async (req: Request, res: Response) => {
+  //----> Get the id of the order to update its status.
+  const {id} = req.params;
+  
+  //----> Retrieve the status from request body.
+  const {status} = req.body as OrderStatusModel;
+
+  //----> Retrieve the order to update his status from database.
+  const order = await prisma.order.findUnique({where: {id}});
+  
+  //----> Check for the existence of order.
+  if (!order){
+    throw catchError(StatusCodes.NOT_FOUND, `The order with id : ${id} is not found the database!`);
+  }
+
+  //----> Update the order status in the database.
+  const updatedOrder = await prisma.order.update({where: {id}, data: {...order, status}});
+
+  //----> Send back the response.
+  res.status(StatusCodes.OK).json(updatedOrder)
+
+}
+
 function totalPrice(cartItems: CartItem[]) {
   return cartItems.reduce(
     (prev, cartItem) => Number(cartItem.price) * cartItem.quantity + prev,
@@ -217,4 +241,5 @@ export {
   getOrderById,
   getOrdersByUserId,
   updatedOrder,
+  updateOrderStatus,
 };

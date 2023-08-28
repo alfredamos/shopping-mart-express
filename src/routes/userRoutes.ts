@@ -2,6 +2,7 @@ import express from "express";
 import {  
   signup as createUser,
   updateProfile as editUser,
+  updateUserRole,
 } from "../controllers/authController";
 import {
   deleteUser,
@@ -15,6 +16,7 @@ import { roleAuthorizationMiddleware } from "../middleware/roleAuthorizationMidd
 import { userSignupValidationMiddleware as userCreateValidationMiddleware } from "../middleware/userSignupValidationMiddleware";
 import { adminAndSelfAuthMiddleware } from "../middleware/adminAndSelfAuthMiddleware";
 import { userEditProfileValidationMiddleware } from "../middleware/userEditProfileValidationMiddleware";
+import { makeAdminUserValidationMiddleware } from "../middleware/makeAdminUserValidationMiddleware";
 
 const router = express.Router();
 
@@ -30,6 +32,15 @@ router
     authenticationMiddleware,
     roleAuthorizationMiddleware("Admin"),
     createUser
+  );
+
+router
+  .route("/change-role")
+  .patch(
+    makeAdminUserValidationMiddleware,
+    authenticationMiddleware,
+    roleAuthorizationMiddleware("Admin"),
+    updateUserRole
   );
 
 router

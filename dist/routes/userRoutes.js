@@ -11,11 +11,15 @@ const roleAuthorizationMiddleware_1 = require("../middleware/roleAuthorizationMi
 const userSignupValidationMiddleware_1 = require("../middleware/userSignupValidationMiddleware");
 const adminAndSelfAuthMiddleware_1 = require("../middleware/adminAndSelfAuthMiddleware");
 const userEditProfileValidationMiddleware_1 = require("../middleware/userEditProfileValidationMiddleware");
+const makeAdminUserValidationMiddleware_1 = require("../middleware/makeAdminUserValidationMiddleware");
 const router = express_1.default.Router();
 router
     .route("/")
     .get(authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), userController_1.getAllUsers)
     .post(userSignupValidationMiddleware_1.userSignupValidationMiddleware, authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), authController_1.signup);
+router
+    .route("/change-role")
+    .patch(makeAdminUserValidationMiddleware_1.makeAdminUserValidationMiddleware, authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), authController_1.updateUserRole);
 router
     .route("/users-by-email")
     .delete(authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), userController_1.deleteUserByEmail);
