@@ -16,7 +16,7 @@ import { roleAuthorizationMiddleware } from "../middleware/roleAuthorizationMidd
 import { userSignupValidationMiddleware as userCreateValidationMiddleware } from "../middleware/userSignupValidationMiddleware";
 import { adminAndSelfAuthMiddleware } from "../middleware/adminAndSelfAuthMiddleware";
 import { userEditProfileValidationMiddleware } from "../middleware/userEditProfileValidationMiddleware";
-import { makeAdminUserValidationMiddleware } from "../middleware/makeAdminUserValidationMiddleware";
+import { roleUserValidationMiddleware } from "../middleware/roleUserValidationMiddleware";
 
 const router = express.Router();
 
@@ -37,7 +37,7 @@ router
 router
   .route("/change-role")
   .patch(
-    makeAdminUserValidationMiddleware,
+    roleUserValidationMiddleware,
     authenticationMiddleware,
     roleAuthorizationMiddleware("Admin"),
     updateUserRole

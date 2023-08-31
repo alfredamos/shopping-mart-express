@@ -1,17 +1,17 @@
-import { MakeAdminUserModel } from "../models/makeAdminUserModel";
+import { RoleUserModel } from "../models/roleUserModel";
 import { StatusCodes } from "http-status-codes";
 import catchError from "http-errors";
 import { Request, Response, NextFunction } from "express";
-import { makeAdminUserValidation } from "../validations/makeAdminUserValidation";
+import { roleUserValidation } from "../validations/roleUserValidation";
 
-export const makeAdminUserValidationMiddleware = (
+export const roleUserValidationMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const makeAdminUserModel = req.body as MakeAdminUserModel;
+  const roleUserModel = req.body as RoleUserModel;
 
-  const { error, value } = makeAdminUserValidation(makeAdminUserModel);
+  const { error, value } = roleUserValidation(roleUserModel);
 
   if (error) {
     const errorMessages = error.details.map((err) => err.message).join(". ");

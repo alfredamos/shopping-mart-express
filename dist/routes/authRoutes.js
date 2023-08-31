@@ -14,7 +14,7 @@ const userEditProfileValidationMiddleware_1 = require("../middleware/userEditPro
 const adminAndSelfAuthMiddleware_1 = require("../middleware/adminAndSelfAuthMiddleware");
 const idValidMiddleware_1 = require("../middleware/idValidMiddleware");
 const roleAuthorizationMiddleware_1 = require("../middleware/roleAuthorizationMiddleware");
-const makeAdminUserValidationMiddleware_1 = require("../middleware/makeAdminUserValidationMiddleware");
+const roleUserValidationMiddleware_1 = require("../middleware/roleUserValidationMiddleware");
 const router = express_1.default.Router();
 router.param("id", idValidMiddleware_1.idValidMiddleware);
 router
@@ -24,7 +24,7 @@ router.route("/current-user").get(authenticationMiddleware_1.authenticationMiddl
 router.route("/login").post(userLoginValidationMiddleware_1.userLoginValidationMiddleware, authController_1.login);
 router
     .route("/change-role")
-    .patch(makeAdminUserValidationMiddleware_1.makeAdminUserValidationMiddleware, authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), authController_1.updateUserRole);
+    .patch(roleUserValidationMiddleware_1.roleUserValidationMiddleware, authenticationMiddleware_1.authenticationMiddleware, (0, roleAuthorizationMiddleware_1.roleAuthorizationMiddleware)("Admin"), authController_1.updateUserRole);
 router.route("/signup").post(userSignupValidationMiddleware_1.userSignupValidationMiddleware, authController_1.signup);
 router
     .route("/users")

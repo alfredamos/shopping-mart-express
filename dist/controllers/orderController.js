@@ -74,9 +74,6 @@ const deleteOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 deleteMany: {},
             },
         },
-        include: {
-            cartItems: true,
-        },
     });
     //----> Delete the order.
     const deletedOrder = yield productDb_1.prisma.order.delete({ where: { id } });
@@ -88,7 +85,22 @@ const getAllOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     //----> Get orders from database.
     const orders = yield productDb_1.prisma.order.findMany({
         include: {
-            cartItems: true,
+            cartItems: {
+                select: {
+                    product: true,
+                    id: true,
+                    quantity: true,
+                    price: true,
+                },
+            },
+            user: {
+                select: {
+                    name: true,
+                    email: true,
+                    phone: true,
+                    gender: true,
+                },
+            },
         },
     });
     if (!orders || orders.length === 0) {
@@ -102,7 +114,27 @@ const getOrderById = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     //----> Get the order id from params
     const { id } = req.params;
     //----> Check for the existence of order in the database.
-    const order = yield productDb_1.prisma.order.findUnique({ where: { id }, include: { cartItems: true, }, });
+    const order = yield productDb_1.prisma.order.findUnique({
+        where: { id },
+        include: {
+            cartItems: {
+                select: {
+                    product: true,
+                    id: true,
+                    quantity: true,
+                    price: true,
+                },
+            },
+            user: {
+                select: {
+                    name: true,
+                    email: true,
+                    phone: true,
+                    gender: true,
+                },
+            },
+        },
+    });
     //----> Throw error for non existent order.
     if (!order) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `Order with id = ${id} is not found.`);
@@ -115,7 +147,27 @@ const getOrdersByUserId = (req, res) => __awaiter(void 0, void 0, void 0, functi
     //----> Extract the user id from params.
     const { userId } = req.params;
     //----> Get orders by user id.
-    const orders = yield productDb_1.prisma.order.findMany({ where: { userId } });
+    const orders = yield productDb_1.prisma.order.findMany({
+        where: { userId },
+        include: {
+            cartItems: {
+                select: {
+                    product: true,
+                    id: true,
+                    quantity: true,
+                    price: true,
+                },
+            },
+            user: {
+                select: {
+                    name: true,
+                    email: true,
+                    phone: true,
+                    gender: true,
+                },
+            },
+        },
+    });
     //----> Check for the existence of orders.
     if (!orders || orders.length === 0) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `Orders by user with userId : ${userId}`);
@@ -132,7 +184,10 @@ const updatedOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     const userId = rests === null || rests === void 0 ? void 0 : rests.userId;
     console.log({ cartItems, rests, userId });
     //----> Retrieve the user attached to this order
-    const user = yield productDb_1.prisma.user.findUnique({ where: { id: userId } });
+    const user = yield productDb_1.prisma.user.findUnique({
+        where: { id: userId },
+        include: {},
+    });
     console.log({ user });
     //---> Check for the existence of user.
     if (!user) {
@@ -157,7 +212,17 @@ const updatedOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     //----> Retrieve the latest updated order.
     const updatedOrder = yield productDb_1.prisma.order.findUnique({
         where: { id },
-        include: { cartItems: true },
+        include: {
+            cartItems: true,
+            user: {
+                select: {
+                    name: true,
+                    email: true,
+                    phone: true,
+                    gender: true,
+                },
+            },
+        },
     });
     //----> Send back the response.
     res.status(http_status_codes_1.StatusCodes.OK).json(updatedOrder);
@@ -168,7 +233,6 @@ const updateOrderStatus = (req, res) => __awaiter(void 0, void 0, void 0, functi
     const { id } = req.params;
     //----> Retrieve the status from request body.
     const { status } = req.body;
-    console.log({ id, status });
     //----> Retrieve the order to update his status from database.
     const order = yield productDb_1.prisma.order.findUnique({ where: { id } });
     //----> Check for the existence of order.
@@ -176,7 +240,10 @@ const updateOrderStatus = (req, res) => __awaiter(void 0, void 0, void 0, functi
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `The order with id : ${id} is not found the database!`);
     }
     //----> Update the order status in the database.
-    const updatedOrder = yield productDb_1.prisma.order.update({ where: { id }, data: Object.assign(Object.assign({}, order), { status }) });
+    const updatedOrder = yield productDb_1.prisma.order.update({
+        where: { id },
+        data: Object.assign(Object.assign({}, order), { status }),
+    });
     //----> Send back the response.
     res.status(http_status_codes_1.StatusCodes.OK).json(updatedOrder);
 });

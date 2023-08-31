@@ -50,7 +50,34 @@ const deleteCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.deleteCartItem = deleteCartItem;
 const getAllCartItems = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //----> Get cartItems from database.
-    const cartItems = yield productDb_1.prisma.cartItem.findMany();
+    const cartItems = yield productDb_1.prisma.cartItem.findMany({
+        select: {
+            id: true,
+            quantity: true,
+            price: true,
+            productId: true,
+            order: {
+                select: {
+                    user: {
+                        select: {
+                            name: true,
+                            email: true,
+                            phone: true,
+                            gender: true,
+                        },
+                    },
+                    id: true,
+                },
+            },
+            product: {
+                select: {
+                    name: true,
+                    brand: true,
+                    price: true,
+                },
+            },
+        },
+    });
     if (!cartItems || cartItems.length === 0) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, "CarItems are empty! ");
     }
@@ -62,7 +89,35 @@ const getCartItemById = (req, res) => __awaiter(void 0, void 0, void 0, function
     //----> Get the cartItem id from params
     const { id } = req.params;
     //----> Check for the existence of cartItem in the database.
-    const cartItem = yield productDb_1.prisma.cartItem.findUnique({ where: { id } });
+    const cartItem = yield productDb_1.prisma.cartItem.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            quantity: true,
+            price: true,
+            productId: true,
+            order: {
+                select: {
+                    user: {
+                        select: {
+                            name: true,
+                            email: true,
+                            phone: true,
+                            gender: true,
+                        },
+                    },
+                    id: true,
+                },
+            },
+            product: {
+                select: {
+                    name: true,
+                    brand: true,
+                    price: true,
+                },
+            },
+        },
+    });
     //----> Throw error for non existent cartItem.
     if (!cartItem) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `CartItem with id = ${id} is not found.`);

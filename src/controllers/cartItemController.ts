@@ -51,7 +51,33 @@ const deleteCartItem = async (req: Request, res: Response) => {
 
 const getAllCartItems = async (req: Request, res: Response) => {
   //----> Get cartItems from database.
-  const cartItems = await prisma.cartItem.findMany();
+  const cartItems = await prisma.cartItem.findMany({
+      select: {
+        id: true,
+        quantity: true,
+        price: true,
+        productId: true,
+        order: {
+          select: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+                phone: true,
+                gender: true,
+              },
+            },
+            id: true,
+          },
+        },
+        product: {
+          select: {
+            name: true,
+            brand: true,
+            price: true,
+          },
+        },
+      },  });
 
   if (!cartItems || cartItems.length === 0) {
     throw catchError(StatusCodes.NOT_FOUND, "CarItems are empty! ");
@@ -66,7 +92,35 @@ const getCartItemById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   //----> Check for the existence of cartItem in the database.
-  const cartItem = await prisma.cartItem.findUnique({ where: { id } });
+  const cartItem = await prisma.cartItem.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      quantity: true,
+      price: true,
+      productId: true,
+      order: {
+        select: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              phone: true,
+              gender: true,
+            },
+          },
+          id: true,
+        },
+      },
+      product: {
+        select: {
+          name: true,
+          brand: true,
+          price: true,
+        },
+      },
+    },
+  });
 
   //----> Throw error for non existent cartItem.
   if (!cartItem) {

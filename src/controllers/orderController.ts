@@ -70,9 +70,6 @@ const deleteOrder = async (req: Request, res: Response) => {
         deleteMany: {},
       },
     },
-    include: {
-      cartItems: true,
-    },
   });
 
   //----> Delete the order.
@@ -86,7 +83,22 @@ const getAllOrders = async (req: Request, res: Response) => {
   //----> Get orders from database.
   const orders = await prisma.order.findMany({
     include: {
-      cartItems: true,
+      cartItems: {
+        select: {
+          product: true,
+          id: true,
+          quantity: true,
+          price: true,
+        },
+      },
+      user: {
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+          gender: true,
+        },
+      },
     },
   });
 
@@ -103,11 +115,34 @@ const getOrderById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   //----> Check for the existence of order in the database.
-  const order = await prisma.order.findUnique({where: { id },include: {cartItems: true,},});
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      cartItems: {
+        select: {
+          product: true,
+          id: true,
+          quantity: true,
+          price: true,
+        },
+      },
+      user: {
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+          gender: true,
+        },
+      },
+    },
+  });
 
   //----> Throw error for non existent order.
   if (!order) {
-    throw catchError(StatusCodes.NOT_FOUND,`Order with id = ${id} is not found.`);
+    throw catchError(
+      StatusCodes.NOT_FOUND,
+      `Order with id = ${id} is not found.`
+    );
   }
 
   //----> Send back response.
@@ -116,19 +151,42 @@ const getOrderById = async (req: Request, res: Response) => {
 
 const getOrdersByUserId = async (req: Request, res: Response) => {
   //----> Extract the user id from params.
-  const {userId} = req.params;
+  const { userId } = req.params;
 
   //----> Get orders by user id.
-  const orders = await prisma.order.findMany({where: {userId}});
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    include: {
+      cartItems: {
+        select: {
+          product: true,
+          id: true,
+          quantity: true,
+          price: true,
+        },
+      },
+      user: {
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+          gender: true,
+        },
+      },
+    },
+  });
 
   //----> Check for the existence of orders.
   if (!orders || orders.length === 0) {
-    throw catchError(StatusCodes.NOT_FOUND, `Orders by user with userId : ${userId}`);
+    throw catchError(
+      StatusCodes.NOT_FOUND,
+      `Orders by user with userId : ${userId}`
+    );
   }
 
   //----> Send back the response.
   res.status(StatusCodes.OK).json(orders);
-}
+};
 
 const updatedOrder = async (req: Request, res: Response) => {
   //----> Get the order id from params.
@@ -142,7 +200,10 @@ const updatedOrder = async (req: Request, res: Response) => {
   console.log({ cartItems, rests, userId });
 
   //----> Retrieve the user attached to this order
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {},
+  });
   console.log({ user });
   //---> Check for the existence of user.
   if (!user) {
@@ -181,7 +242,17 @@ const updatedOrder = async (req: Request, res: Response) => {
   //----> Retrieve the latest updated order.
   const updatedOrder = await prisma.order.findUnique({
     where: { id },
-    include: { cartItems: true },
+    include: {
+      cartItems: true,
+      user: {
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+          gender: true,
+        },
+      },
+    },
   });
 
   //----> Send back the response.
@@ -190,26 +261,31 @@ const updatedOrder = async (req: Request, res: Response) => {
 
 const updateOrderStatus = async (req: Request, res: Response) => {
   //----> Get the id of the order to update its status.
-  const {id} = req.params;
-  
+  const { id } = req.params;
+
   //----> Retrieve the status from request body.
-  const {status} = req.body as OrderStatusModel;
+  const { status } = req.body as OrderStatusModel;
 
   //----> Retrieve the order to update his status from database.
-  const order = await prisma.order.findUnique({where: {id}});
-  
+  const order = await prisma.order.findUnique({ where: { id } });
+
   //----> Check for the existence of order.
-  if (!order){
-    throw catchError(StatusCodes.NOT_FOUND, `The order with id : ${id} is not found the database!`);
+  if (!order) {
+    throw catchError(
+      StatusCodes.NOT_FOUND,
+      `The order with id : ${id} is not found the database!`
+    );
   }
 
   //----> Update the order status in the database.
-  const updatedOrder = await prisma.order.update({where: {id}, data: {...order, status}});
+  const updatedOrder = await prisma.order.update({
+    where: { id },
+    data: { ...order, status },
+  });
 
   //----> Send back the response.
-  res.status(StatusCodes.OK).json(updatedOrder)
-
-}
+  res.status(StatusCodes.OK).json(updatedOrder);
+};
 
 function totalPrice(cartItems: CartItem[]) {
   return cartItems.reduce(
