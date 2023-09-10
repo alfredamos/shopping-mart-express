@@ -11,8 +11,8 @@ const productValidationSchema = joi_1.default.object({
     price: joi_1.default.number().required(),
     quantity: joi_1.default.number().required(),
     rating: joi_1.default.number().optional(),
-    description: joi_1.default.number().optional(),
-    productImage: joi_1.default.number().optional(),
+    description: joi_1.default.string().optional(),
+    // productImage: Joi.string().optional(),
     brand: joi_1.default.string().required(),
     categoryId: joi_1.default.string().required(),
 });
@@ -26,7 +26,7 @@ const productValidation = (productModel) => {
         name,
         price,
         rating,
-        productImage,
+        //  productImage,
         quantity
     }, { abortEarly: false });
 };

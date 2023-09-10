@@ -7,8 +7,8 @@ const productValidationSchema = Joi.object({
   price: Joi.number().required(), 
   quantity: Joi.number().required(), 
   rating: Joi.number().optional(),
-  description: Joi.number().optional(),
-  productImage: Joi.number().optional(),
+  description: Joi.string().optional(),
+ // productImage: Joi.string().optional(),
   brand: Joi.string().required(),
   categoryId: Joi.string().required(),
   
@@ -25,7 +25,7 @@ export const productValidation = (productModel: ProductModel) => {
     name,
     price,   
     rating,
-    productImage,
+  //  productImage,
     quantity   
   },{abortEarly: false});
 };

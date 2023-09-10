@@ -1,4 +1,4 @@
 export class CategoryModel{
-  id: string = "";
+  id?: string = "";
   name: string = "";
 }

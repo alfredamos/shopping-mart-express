@@ -78,12 +78,14 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     throw catchError(StatusCodes.UNAUTHORIZED, "Invalid credentials!");
   }
 
+  delete user.password; //----> Do not send back the password;
+
   //---> Get jwt token.
   const token = await getJwtToken(user.id, user.name, user.role);
   //----> Send back the response to user.
   res
     .status(StatusCodes.OK)
-    .json({ message: "Login is successful!", isLoggedIn: true, token, role: user.role });
+    .json({ message: "Login is successful!", isLoggedIn: true, token, role: user.role, user });
 };
 
 const updateUserRole = async (req: Request, res: Response) => {
@@ -133,6 +135,8 @@ const updateUserRole = async (req: Request, res: Response) => {
     data: { ...user, role },
   });
 
+  delete userUpdated.password; //----> Do not send back the password.
+
   //----> Send back the response.
   res.status(StatusCodes.OK).json({
     message: `The user with email = ${userUpdated.email} is now an admin!`,
@@ -169,10 +173,12 @@ const signup = async (req: Request, res: Response) => {
   //---> Get jwt token.
   const token = await getJwtToken(newUser.id, newUser.name, newUser.role);
 
+  delete newUser.password; //----> Do not send back the password.
+
   //----> Send back the response to user.
   res
     .status(StatusCodes.CREATED)
-    .json({ message: "Signup is successful!", isLoggedIn: true, token });
+    .json({ message: "Signup is successful!", isLoggedIn: true, token, newUser });
 };
 
 const updateProfile = async (req: Request, res: Response) => {
@@ -210,10 +216,12 @@ const updateProfile = async (req: Request, res: Response) => {
     editedUserInfo.role
   );
 
+  delete editedUserInfo.password; //----> Do not send back the password.
+
   //----> Send the response to the user.
   res
     .status(StatusCodes.OK)
-    .json({ message: "Profile updated successfully", isLoggedIn: true, token });
+    .json({ message: "Profile updated successfully", isLoggedIn: true, token, editedUserInfo });
 };
 
 async function getJwtToken(id: string, name: string, role: Role) {

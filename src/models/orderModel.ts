@@ -1,6 +1,6 @@
 import { CartItem, Status } from "@prisma/client";
 
-export class OrderModel{
+export class OrderModel {
   id: string = "";
   userId: string;
   total?: number = 0;
