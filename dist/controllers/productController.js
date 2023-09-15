@@ -105,8 +105,10 @@ const updatedProduct = (req, res) => __awaiter(void 0, void 0, void 0, function*
     if (!category) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `Category with id : ${categoryId} is not found in the database!`);
     }
+    console.log({ category });
     //----> Check for the existence of the said product in the database.
     const product = yield productDb_1.prisma.product.findUnique({ where: { id } });
+    console.log({ product });
     //----> Throw error for non existent product.
     if (!product) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.NOT_FOUND, `Product with id = ${id} is not found.`);

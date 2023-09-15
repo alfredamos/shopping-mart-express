@@ -101,12 +101,19 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
     if (!isValidPassword) {
         throw (0, http_errors_1.default)(http_status_codes_1.StatusCodes.UNAUTHORIZED, "Invalid credentials!");
     }
+    delete user.password; //----> Do not send back the password;
     //---> Get jwt token.
     const token = yield getJwtToken(user.id, user.name, user.role);
     //----> Send back the response to user.
     res
         .status(http_status_codes_1.StatusCodes.OK)
-        .json({ message: "Login is successful!", isLoggedIn: true, token, role: user.role });
+        .json({
+        message: "Login is successful!",
+        isLoggedIn: true,
+        token,
+        role: user.role,
+        user,
+    });
 });
 exports.login = login;
 const updateUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -139,6 +146,7 @@ const updateUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function*
         where: { email: userEmail },
         data: Object.assign(Object.assign({}, user), { role }),
     });
+    delete userUpdated.password; //----> Do not send back the password.
     //----> Send back the response.
     res.status(http_status_codes_1.StatusCodes.OK).json({
         message: `The user with email = ${userUpdated.email} is now an admin!`,
@@ -165,10 +173,16 @@ const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     });
     //---> Get jwt token.
     const token = yield getJwtToken(newUser.id, newUser.name, newUser.role);
+    delete newUser.password; //----> Do not send back the password.
     //----> Send back the response to user.
     res
         .status(http_status_codes_1.StatusCodes.CREATED)
-        .json({ message: "Signup is successful!", isLoggedIn: true, token });
+        .json({
+        message: "Signup is successful!",
+        isLoggedIn: true,
+        token,
+        newUser,
+    });
 });
 exports.signup = signup;
 const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -191,10 +205,16 @@ const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     });
     //----> Get the jwt token.
     const token = yield getJwtToken(editedUserInfo.id, editedUserInfo.name, editedUserInfo.role);
+    delete editedUserInfo.password; //----> Do not send back the password.
     //----> Send the response to the user.
     res
         .status(http_status_codes_1.StatusCodes.OK)
-        .json({ message: "Profile updated successfully", isLoggedIn: true, token });
+        .json({
+        message: "Profile updated successfully",
+        isLoggedIn: true,
+        token,
+        editedUserInfo,
+    });
 });
 exports.updateProfile = updateProfile;
 function getJwtToken(id, name, role) {

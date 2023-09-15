@@ -3,7 +3,6 @@ import { prisma } from "../db/productDb";
 import catchError from "http-errors";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcryptjs";
-import { UuidTool } from "uuid-tool";
 import * as jwt from "jsonwebtoken";
 import { Role } from "@prisma/client";
 import { ChangePasswordModel } from "../models/changePasswordModel";
@@ -61,7 +60,6 @@ const changePassword = async (req: Request, res: Response) => {
   });
 };
 
-
 const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body as LoginModel;
   //----> Check the authenticity of the user.
@@ -85,7 +83,13 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   //----> Send back the response to user.
   res
     .status(StatusCodes.OK)
-    .json({ message: "Login is successful!", isLoggedIn: true, token, role: user.role, user });
+    .json({
+      message: "Login is successful!",
+      isLoggedIn: true,
+      token,
+      role: user.role,
+      user,
+    });
 };
 
 const updateUserRole = async (req: Request, res: Response) => {
@@ -94,15 +98,6 @@ const updateUserRole = async (req: Request, res: Response) => {
 
   //----> Check for authentication.
   if (!userInfo) {
-    throw catchError(StatusCodes.UNAUTHORIZED, "Invalid credentials");
-  }
-
-  const userId = userInfo?.id;
-
-  const isUuid = UuidTool.isUuid(userId);
-
-  //----> Check for validity of id.
-  if (!userId || !isUuid) {
     throw catchError(StatusCodes.UNAUTHORIZED, "Invalid credentials");
   }
 
@@ -178,12 +173,17 @@ const signup = async (req: Request, res: Response) => {
   //----> Send back the response to user.
   res
     .status(StatusCodes.CREATED)
-    .json({ message: "Signup is successful!", isLoggedIn: true, token, newUser });
+    .json({
+      message: "Signup is successful!",
+      isLoggedIn: true,
+      token,
+      newUser,
+    });
 };
 
 const updateProfile = async (req: Request, res: Response) => {
   const { email, password, ...editedProfile } = req.body as EditProfileModel;
-  
+
   //----> Check for the existence of user.
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
@@ -221,7 +221,12 @@ const updateProfile = async (req: Request, res: Response) => {
   //----> Send the response to the user.
   res
     .status(StatusCodes.OK)
-    .json({ message: "Profile updated successfully", isLoggedIn: true, token, editedUserInfo });
+    .json({
+      message: "Profile updated successfully",
+      isLoggedIn: true,
+      token,
+      editedUserInfo,
+    });
 };
 
 async function getJwtToken(id: string, name: string, role: Role) {
@@ -230,10 +235,4 @@ async function getJwtToken(id: string, name: string, role: Role) {
   return jwt.sign({ id, name, role }, JWT_SECRET_KEY, { expiresIn: "1hr" });
 }
 
-export {
-  changePassword,    
-  login,
-  updateUserRole,
-  signup,
-  updateProfile,
-};
+export { changePassword, login, updateUserRole, signup, updateProfile };

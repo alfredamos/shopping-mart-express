@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import catchError from "http-errors";
 import { StatusCodes } from "http-status-codes";
 import { ProductModel } from "../models/productModel";
+import { log } from "console";
 
 const createProduct = async (req: Request, res: Response) => {
   //----> Get new product input from body.
@@ -113,8 +114,9 @@ const updatedProduct = async (req: Request, res: Response) => {
 
   //----> Get the product to edit input data from body.
   const { body: productToEdit } = req;
+  
   const { categoryId } = req.body as ProductModel;
-
+  
   //----> Retrieve the product category.
   const category = await prisma.category.findUnique({
     where: { id: categoryId },
@@ -126,9 +128,11 @@ const updatedProduct = async (req: Request, res: Response) => {
     );
   }
 
+  console.log({category})
+
   //----> Check for the existence of the said product in the database.
   const product = await prisma.product.findUnique({ where: { id } });
-
+  console.log({product})
   //----> Throw error for non existent product.
   if (!product) {
     throw catchError(
