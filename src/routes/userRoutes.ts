@@ -66,12 +66,4 @@ router
     editUser
   );
 
-router
-  .route("/auth/delete-by-email")
-  .delete(
-    authenticationMiddleware,
-    roleAuthorizationMiddleware("Admin"),
-    deleteUserByEmail
-  );
-
 export default router;
